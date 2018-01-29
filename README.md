@@ -59,3 +59,63 @@ public final class Class<T> implements Serializable {
 
 #### 3.3
 最后，我们总结一下，Class.forName(String className)不仅会将类加载进来，而且会对其进行初始化，而ClassLoader.loadClass(String ClassName)则只是将类加载进来，而没有对类进行初始化。一般来讲，他们两个是通用的，但如果你加载类依赖初始化值的话，那ClassLoader.loadClass(String ClassName)将不再适用。
+
+### 4. 夯实JAVA基本之二 —— 反射（2）：泛型相关周边信息获取
+[夯实JAVA基本之二 —— 反射（2）：泛型相关周边信息获取](http://blog.csdn.net/harvic880925/article/details/50085595)
+#### 4.1
+getActualTypeArguments()：用来返回当前泛型表达式中，用来填充泛型变量的真正值的列表。像我们这里得到的Point，用来填充泛型变量T的是Integer类型，所以这里返回的Integer类型所对应的Class对象。（有关这一段，下面会补充，这里先看getRawType）
+getRawType()：我们从我们上面的代码中，也可以看到，它返回的值是com.harvic.blog_reflect_2.Point，所以它的意义就是声明当前泛型表达式的类或者接口的Class对象。比如，我们这里的type对应的是Point，而声明Point这个泛型的当然是Point类型。所以返回的是Point.Class
+#### 4.2
+这里提前强调一点：大家需要注意是getGenericInterfaces()数与Class.getInterfaces()函数一样，都只能获取此类直接继承的接口列表！
+#### 4.3
+上面说们说过，Type接口是用来保存当前泛型被填充的类型的，它总共有五种类型：Class,ParameterizedType,TypeVariable,WildcardType,GenericArrayType
+
+在这上面的例子中，我们用到了Class,ParameterizedType；
+
+当type所代表的表达式是一个完整泛型时，比如Point,那这个Type类型就是ParameterizedType；如果type所代表的是一个确定的类，比如Integer,String,Double等，那这个type所对应的类型就是Class;强转之后，得到的就是他们所对应的Class对象，即Integer.Class,String.Class,Double.Class等
+
+前面我们说过，如果type对应的是一个泛型变量，即类似于T,或U这种还没有被填充的泛型变量，那它的类型就是TypeVariable；
+
+而如果type对应的是一个通配符表达式，比如？ extends Num，或者仅仅是一个通配符？，类似这种有通符符的类型就是WildcardType；
+
+而如果type对应的类型是类似于String[]的数组，那它的类型就是GenericArrayType；
+
+### 5. 夯实JAVA基本之二 —— 反射（3）：类内部信息获取
+[夯实JAVA基本之二 —— 反射（3）：类内部信息获取](http://blog.csdn.net/harvic880925/article/details/50107951)
+#### 5.1
+```java
+//获取public类型的构造函数  
+Constructor<?>[] getConstructors();  
+Constructor<T> getConstructor(Class<?>... parameterTypes);  
+  
+//获取所有类型的构造函数  
+Constructor<?>[] getDeclaredConstructors();  
+Constructor<T> getDeclaredConstructor(Class<?>... parameterTypes)  
+```
+这四种方法中，getConstructors与getConstructor获取的是声明为public的构造函数。无法得到声明为protected,private的构造函数。而加有Declared（声明）的两个函数getDeclaredConstructors，getDeclaredConstructor能获取所有声明的构造函数，无论它是public,proctected还是private类型，都能获取到。所以这两个函数较为常用。
+#### 5.2
+```java
+//仅能获取声明类型为public的成员变量  
+Field[] getFields();  
+Field getField(String name);  
+//可以获取全部的成员变量  
+Field[] getDeclaredFields();  
+Field getDeclaredField(String name)  
+```
+可以看到与Constructor的获取方法类似，这里也有四个函数，其中getFields()和getField(String name)只能够获取到声明为public类型的成员变量，而getDeclaredFields()和getDeclaredField(String name)则可以得到所有的成员变量，无论是设置为public,protected还是private都是可以得到的。
+getFields()和getDeclaredFields()是得到所有能够得到的成员变量的Field数组。
+getField(String name)和getDeclaredField(String name)的意义是得到指定变量名的对应的Field对象。
+#### 5.3
+```java
+Method[] getMethods()  
+Method getMethod(String name, Class<?>... parameterTypes)  
+  
+Method[] getDeclaredMethods()  
+Method getDeclaredMethod(String name, Class<?>... parameterTypes)  
+```
+与上面所有的有Declared系列的函数组一样，getMethods()和getMethod()只能获取声明为public的函数。而getDeclaredMethods()、getDeclaredMethod()可以得到所有的函数，无论声明为public,protected还是private。
+#### 5.4
+```java
+Object invoke(Object receiver, Object... args)  
+```
+Invoke函数无疑是Method类中最重要的方法，它的功能是用于执行Method对象所对应的函数。
