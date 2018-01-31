@@ -80,6 +80,45 @@ getRawType()：我们从我们上面的代码中，也可以看到，它返回�
 
 而如果type对应的类型是类似于String[]的数组，那它的类型就是GenericArrayType；
 
+### 正所谓温故而知新 可以为师也 读了第二遍又有一些体会
+#### 4.4
+- 获取泛型超类信息
+```java
+//针对泛型父类而设计  
+public Type getGenericSuperclass();  
+```
+- 获取所继承泛型接口的相关信息
+```java
+//获取泛型接口的方法  
+public Type[] getGenericInterfaces();  
+```
+#### 一层一层剥离 看不懂回顾[这里](https://github.com/ainiyiwan/OkGo2.x/blob/master/app/src/main/java/com/lzy/demo/callback/JsonCallback.java)
+```java
+//////////////////////test/////////////第一步解析出来的：com.lzy.demo.callback.DialogCallback
+        ParameterizedType parameterizedType = (ParameterizedType) genType;
+        Type types = parameterizedType.getRawType();
+        Class classs = (Class) types;
+        String a = classs.getName();
+        ///////////////////////test
+
+
+        //////////////////////test/////////////第二步解析出来的：com.lzy.demo.model.LzyResponse
+        Type[] param2 = ((ParameterizedType) genType).getActualTypeArguments();
+        Type type2 = param2[0];
+        Type rawTypes = ((ParameterizedType) type2).getRawType();
+        Class class2 = (Class) rawTypes;
+        String b = class2.getName();
+        ///////////////////////test
+
+        //////////////////////test/////////////第三步解析出来的：com.lzy.demo.model.ServerModel
+        Type[] param3 = ((ParameterizedType) type2).getActualTypeArguments();
+        Type type3 = param3[0];
+//        Type rawType3 = ((ParameterizedType) type3).getRawType();
+        Class class3 = (Class) type3;
+        String c = class3.getName();
+        ///////////////////////test
+```
+
 ### 5. 夯实JAVA基本之二 —— 反射（3）：类内部信息获取
 [夯实JAVA基本之二 —— 反射（3）：类内部信息获取](http://blog.csdn.net/harvic880925/article/details/50107951)
 #### 5.1
